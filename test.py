@@ -4,6 +4,7 @@
 # @Author  : jiong (447991103@qq.com)
 # @Version : $Id$
 
+from __future__ import division
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -34,7 +35,7 @@ sys.path
 # import csv
 # fenci = open('./test/fenci/财经.txt'.decode('utf-8'), 'w')  # 数据写入到fenci_key里
 zh_stopkey = [line.strip().decode('utf-8')
-              for line in open('stop_words.dat').readlines()]
+			  for line in open('stop_words.dat').readlines()]
 
 # 读取停止词文件并保存到列表stopkey
 # print zh_stopkey
@@ -76,365 +77,373 @@ zh_stopkey = [line.strip().decode('utf-8')
 
 
 def stop_words(path='./stop_words.dat'):
-    # 中文停用词的列表
-    zh_stopkey = [line.strip().decode('utf-8')
-                  for line in open(path).readlines()]
-    return zh_stopkey
+	# 中文停用词的列表
+	zh_stopkey = [line.strip().decode('utf-8')
+				  for line in open(path).readlines()]
+	return zh_stopkey
 
 
 def fenci_test(news):
-    """
-    输入str类型的新闻，输出分词之后的列表，列表元素是以空格隔开的str类型的新闻
+	"""
+	输入str类型的新闻，输出分词之后的列表，列表元素是以空格隔开的str类型的新闻
 
-    """
-    import jieba
-    print type(news)
-    if isinstance(news, str):
-        res = []
-        dealed_news = jieba.cut(news, cut_all=False)
-        temp = ' '.join(dealed_news)
-        return res.append(temp)
-    else:
-        res = []
-        for e in news:
-            dealed_news = jieba.cut(e, cut_all=False)
-            temp = ' '.join(dealed_news)
-            res.append(temp)
-        return res
+	"""
+	import jieba
+	print type(news)
+	if isinstance(news, str):
+		res = []
+		dealed_news = jieba.cut(news, cut_all=False)
+		temp = ' '.join(dealed_news)
+		return res.append(temp)
+	else:
+		res = []
+		for e in news:
+			dealed_news = jieba.cut(e, cut_all=False)
+			temp = ' '.join(dealed_news)
+			res.append(temp)
+		return res
 
 
 def deal_test_data(path, filename):
-    """
-    处理文本，将一个大类数千篇文档集中在一个文本的形式修改为如下形式
-    配合scikit-learn中的feature_extraction模块进行分析
-    data
-    |---cat1
-       |---txt1
-       |---txt2
-       |---...
-    |---cat2
-       |---txt1
-       |---txt2
-       |---...
-    |---...
-    """
-    import os
+	"""
+	处理文本，将一个大类数千篇文档集中在一个文本的形式修改为如下形式
+	配合scikit-learn中的feature_extraction模块进行分析
+	data
+	|---cat1
+	   |---txt1
+	   |---txt2
+	   |---...
+	|---cat2
+	   |---txt1
+	   |---txt2
+	   |---...
+	|---...
+	"""
+	import os
 
-    # 目录是否存在，不存就创建
-    if os.path.exists('./%s' % filename):
-        pass
-    else:
-        os.mkdir('./%s' % filename)
+	# 目录是否存在，不存就创建
+	if os.path.exists('./%s' % filename):
+		pass
+	else:
+		os.mkdir('./%s' % filename)
 
-    file_list = os.listdir(path)
+	file_list = os.listdir(path)
 
-    zh_stopkey = stop_words()
-    for each in file_list:
-        count = 0
-        file = open(os.path.join(path, each))
+	zh_stopkey = stop_words()
+	for each in file_list:
+		count = 0
+		file = open(os.path.join(path, each))
 
-        # 把源文件的后缀名去掉
-        each = each.strip('.txt')
+		# 把源文件的后缀名去掉
+		each = each.strip('.txt')
 
-        if os.path.exists('./%s/%s' % (filename, each)):
-            pass
-        else:
-            os.mkdir('./%s/%s' % (filename, each))
+		if os.path.exists('./%s/%s' % (filename, each)):
+			pass
+		else:
+			os.mkdir('./%s/%s' % (filename, each))
 
-        for line in file.readlines():
-            count += 1
-            line = line.strip().strip('[').strip(']').strip()
-            new_file = open('./%s/%s/%s.txt' %
-                            (filename, each, str(count)), 'w')
-            dealed_line = jieba.cut(line, cut_all=False)
+		for line in file.readlines():
+			count += 1
+			line = line.strip().strip('[').strip(']').strip()
+			new_file = open('./%s/%s/%s.txt' %
+							(filename, each, str(count)), 'w')
+			dealed_line = jieba.cut(line, cut_all=False)
 
-            dealed_line1 = []
-            for i in dealed_line:
-                if i not in zh_stopkey:
-                    dealed_line1.append(i)
+			dealed_line1 = []
+			for i in dealed_line:
+				if i not in zh_stopkey:
+					dealed_line1.append(i)
 
-            # dealed_line = list(set(dealed_line) - set(zh_stopkey))
-            new_file.write(' '.join(dealed_line1))
-            new_file.close()
-        file.close()
+			# dealed_line = list(set(dealed_line) - set(zh_stopkey))
+			new_file.write(' '.join(dealed_line1))
+			new_file.close()
+		file.close()
 
 # deal_test_data('./test','test4')
 
 
 class news_classify():
 
-    def __init__(self, data_path='./test3', stop_path='./stop_words.dat', test_size=0.1, ):
-        """
-        初始化参数如下:
-        data_path 训练集数据路径
-        stop_path 停用词数据路径
-        test_size 测试机数据比例,defaul = 0.1
-        fs_method 特征提取方法,default = MI
-        fs_num 特征选择的数量
+	def __init__(self, data_path='./test3', stop_path='./stop_words.dat', test_size=0.1, ):
+		"""
+		初始化参数如下:
+		data_path 训练集数据路径
+		stop_path 停用词数据路径
+		test_size 测试机数据比例,defaul = 0.1
+		fs_method 特征提取方法,default = MI
+		fs_num 特征选择的数量
 
-        初始化函数 切分数据 同时建立词的空间向量模型
-        """
+		初始化函数 切分数据 同时建立词的空间向量模型
+		"""
 
-        print 'is dealing with the file'
+		print 'is dealing with the file'
 
-        # import scipy as sp
-        # import numpy as np
-        from sklearn.datasets import load_files
-        from sklearn.cross_validation import train_test_split
-        from sklearn.feature_extraction.text import TfidfVectorizer
-        from sklearn.feature_extraction.text import CountVectorizer
-        import feature_selection
+		# import scipy as sp
+		# import numpy as np
+		from sklearn.datasets import load_files
+		from sklearn.cross_validation import train_test_split
+		from sklearn.feature_extraction.text import TfidfVectorizer
+		from sklearn.feature_extraction.text import CountVectorizer
+		import feature_selection
 
-        print 'Loading dataset, %s%% for training, %s%% for testing...' % (str((1 - test_size) * 100), str(test_size * 100))
+		print 'Loading dataset, %s%% for training, %s%% for testing...' % (str((1 - test_size) * 100), str(test_size * 100))
 
-        self.sohu_news = load_files(data_path)
-        self.test_size = test_size
-        # self.classify_method=classify_method
-        self.stop_path = stop_path
+		self.sohu_news = load_files(data_path)
+		self.test_size = test_size
+		# self.classify_method=classify_method
+		self.stop_path = stop_path
 
-        # 切分数据
-        self.doc_terms_train, self.doc_terms_test, self.y_train, self.y_test\
-            = train_test_split(self.sohu_news.data, self.sohu_news.target, test_size=self.test_size)
+		# 切分数据
+		self.doc_terms_train, self.doc_terms_test, self.y_train, self.y_test\
+			= train_test_split(self.sohu_news.data, self.sohu_news.target, test_size=self.test_size)
 
-        self.zh_stopkey = stop_words(self.stop_path)
+		self.zh_stopkey = stop_words(self.stop_path)
 
-        self.count_vec = TfidfVectorizer(
-            binary=True, stop_words=self.zh_stopkey)
-        self.word_tokenizer = self.count_vec.build_tokenizer()
-        # self.doc_terms_list_train = [self.word_tokenizer(
-        #     doc_str) for doc_str in self.doc_terms_train]
-        self.doc_terms_list_train = [doc_str.strip().split(
-            ' ') for doc_str in self.doc_terms_train]
-        # self.doc_terms_list_train=self.doc_terms_train
+		self.count_vec = TfidfVectorizer(
+			binary=True, stop_words=self.zh_stopkey)
+		self.word_tokenizer = self.count_vec.build_tokenizer()
+		# self.doc_terms_list_train = [self.word_tokenizer(
+		#     doc_str) for doc_str in self.doc_terms_train]
+		self.doc_terms_list_train = [doc_str.strip().split(
+			' ') for doc_str in self.doc_terms_train]
+		# self.doc_terms_list_train=self.doc_terms_train
 
-        # print self.doc_terms_train[0]
-        print len(self.doc_terms_list_train), '@@@@'
-        # print sohu_news.target
+		# print self.doc_terms_train[0]
+		print len(self.doc_terms_list_train), '@@@@'
+		# print sohu_news.target
 
-    def feature_processing(self, fs_method='MI', fs_num=20000):
-        """
-        特征算法选择处理  特征维度选择
-        fs_method default  MI
-        fs_num default 20000
-        """
-        from sklearn.feature_extraction.text import CountVectorizer
-        from sklearn.feature_extraction.text import TfidfVectorizer
+	def feature_processing(self, fs_method='MI', fs_num=20000):
+		"""
+		特征算法选择处理  特征维度选择
+		fs_method default  MI
+		fs_num default 20000
+		"""
+		from sklearn.feature_extraction.text import CountVectorizer
+		from sklearn.feature_extraction.text import TfidfVectorizer
 
-        import feature_selection
+		import feature_selection
 
-        self.fs_method = fs_method
-        self.fs_num = fs_num
-        print 'Feature selection...'
-        print 'fs method:' + self.fs_method, 'fs num:' + str(self.fs_num)
+		self.fs_method = fs_method
+		self.fs_num = fs_num
+		print 'Feature selection...'
+		print 'fs method:' + self.fs_method, 'fs num:' + str(self.fs_num)
 
-        self.term_set_fs = feature_selection.feature_selection(
-            self.doc_terms_list_train, self.y_train, self.fs_method)
+		self.term_set_fs = feature_selection.feature_selection(
+			self.doc_terms_list_train, self.y_train, self.fs_method)
 
-        print len(self.term_set_fs), '!!!!!!'
+		print len(self.term_set_fs), '!!!!!!'
 
-        self.term_set_fs = self.term_set_fs[:self.fs_num]
-        print 'Building VSM model...'
-        self.term_dict = dict(
-            zip(self.term_set_fs, range(len(self.term_set_fs))))
+		self.term_set_fs = self.term_set_fs[:self.fs_num]
+		print 'Building VSM model...'
+		self.term_dict = dict(
+			zip(self.term_set_fs, range(len(self.term_set_fs))))
 
-        # self.count_vec.fixed_vocabulary = False
-        # self.count_vec.vocabulary_ = self.term_dict
+		# self.count_vec.fixed_vocabulary = False
+		# self.count_vec.vocabulary_ = self.term_dict
 
-        self.count_vec = TfidfVectorizer(
-            binary=True, stop_words=self.zh_stopkey, vocabulary=self.term_dict)
+		self.count_vec = TfidfVectorizer(
+			binary=True, stop_words=self.zh_stopkey, vocabulary=self.term_dict)
 
-        # print len(self.count_vec.vocabulary), '111111'
-        self.x_train = self.count_vec.fit_transform(self.doc_terms_train)
-        print type(self.count_vec.vocabulary_)
-        with open('voca1.txt', 'w') as f:
-            for i in self.count_vec.vocabulary_.keys():
-                f.write(i + '\n')
+		# print len(self.count_vec.vocabulary), '111111'
+		self.x_train = self.count_vec.fit_transform(self.doc_terms_train)
+		print type(self.count_vec.vocabulary_)
+		with open('voca1.txt', 'w') as f:
+			for i in self.count_vec.vocabulary_.keys():
+				f.write(i + '\n')
 
-            # for i in range(len(self.count_vec.vocabulary_)):
+			# for i in range(len(self.count_vec.vocabulary_)):
 
-        self.x_test = self.count_vec.transform(self.doc_terms_test)
+		self.x_test = self.count_vec.transform(self.doc_terms_test)
 
-        print self.x_train.shape
+		print self.x_train.shape
 
-        '''BOOL型特征下的向量空间模型，注意，测试样本调用的是transform接口'''
-        # self.count_vec = TfidfVectorizer(binary=False, decode_error='ignore',
-        #                                  stop_words=self.zh_stopkey)
+		'''BOOL型特征下的向量空间模型，注意，测试样本调用的是transform接口'''
+		# self.count_vec = TfidfVectorizer(binary=False, decode_error='ignore',
+		#                                  stop_words=self.zh_stopkey)
 
-        # self.x_train = self.count_vec.fit_transform(self.doc_terms_train)
-        # self.x_test = self.count_vec.transform(self.doc_terms_test)
-        # pass
+		# self.x_train = self.count_vec.fit_transform(self.doc_terms_train)
+		# self.x_test = self.count_vec.transform(self.doc_terms_test)
+		# pass
 
-        # def text_classifly_twang(dataset_dir_name, fs_method, fs_num):
-        #     print 'Loading dataset, 80% for training, 20% for testing...'
-        #     movie_reviews = load_files(dataset_dir_name)
-        #     doc_str_list_train, doc_str_list_test, doc_class_list_train, doc_class_list_test = train_test_split(
-        # movie_reviews.data, movie_reviews.target, test_size=0.2,
-        # random_state=0)
+		# def text_classifly_twang(dataset_dir_name, fs_method, fs_num):
+		#     print 'Loading dataset, 80% for training, 20% for testing...'
+		#     movie_reviews = load_files(dataset_dir_name)
+		#     doc_str_list_train, doc_str_list_test, doc_class_list_train, doc_class_list_test = train_test_split(
+		# movie_reviews.data, movie_reviews.target, test_size=0.2,
+		# random_state=0)
 
-        #     print 'Feature selection...'
-        #     print 'fs method:' + fs_method, 'fs num:' + str(fs_num)
-        #     vectorizer = CountVectorizer(binary=True)
-        #     word_tokenizer = vectorizer.build_tokenizer()
-        #     doc_terms_list_train = [word_tokenizer(
-        #         doc_str) for doc_str in doc_str_list_train]
-        #     term_set_fs = feature_selection.feature_selection(
-        #         doc_terms_list_train, doc_class_list_train, fs_method)[:fs_num]
-        #     print 'Building VSM model...'
-        #     term_dict = dict(zip(term_set_fs, range(len(term_set_fs))))
-        #     vectorizer.fixed_vocabulary = True
-        #     vectorizer.vocabulary_ = term_dict
-        #     doc_train_vec = vectorizer.fit_transform(doc_str_list_train)
-        #     doc_test_vec = vectorizer.transform(doc_str_list_test)
+		#     print 'Feature selection...'
+		#     print 'fs method:' + fs_method, 'fs num:' + str(fs_num)
+		#     vectorizer = CountVectorizer(binary=True)
+		#     word_tokenizer = vectorizer.build_tokenizer()
+		#     doc_terms_list_train = [word_tokenizer(
+		#         doc_str) for doc_str in doc_str_list_train]
+		#     term_set_fs = feature_selection.feature_selection(
+		#         doc_terms_list_train, doc_class_list_train, fs_method)[:fs_num]
+		#     print 'Building VSM model...'
+		#     term_dict = dict(zip(term_set_fs, range(len(term_set_fs))))
+		#     vectorizer.fixed_vocabulary = True
+		#     vectorizer.vocabulary_ = term_dict
+		#     doc_train_vec = vectorizer.fit_transform(doc_str_list_train)
+		#     doc_test_vec = vectorizer.transform(doc_str_list_test)
 
-    def NB(self,):
-        print u'正在使用naive bayes算法进行分类...'
-        # self.vectors_test = count_vec.transform(self.sohu_news.data)
-        from sklearn.naive_bayes import MultinomialNB
-        from sklearn import metrics
-        print '*************************\nNB\n*************************'
-        self.NB_clf = MultinomialNB(alpha=.01)
-        self.NB_clf.fit(self.x_train, self.y_train)
-        # print x_test.toarray()
-        self.train_NB_pred = self.NB_clf.predict(self.x_test)
-        print '以%s的数据测试，分类方法NB，效果如下：'.decode('utf-8') % str(self.test_size)
-        a = self.calculate_result(self.y_test, self.train_NB_pred)
-        print 'acc', a
-        print 'f1_score', metrics.f1_score(self.y_test, self.train_NB_pred, average='weighted')
-        # print pred
+	def NB(self,):
+		print u'正在使用naive bayes算法进行分类...'
+		# self.vectors_test = count_vec.transform(self.sohu_news.data)
+		from sklearn.naive_bayes import MultinomialNB
+		from sklearn import metrics
+		print '*************************\nNB\n*************************'
+		self.NB_clf = MultinomialNB(alpha=.01)
+		self.NB_clf.fit(self.x_train, self.y_train)
+		# print x_test.toarray()
+		self.train_NB_pred = self.NB_clf.predict(self.x_test)
+		print '以%s的数据测试，分类方法NB，效果如下：'.decode('utf-8') % str(self.test_size)
+		a = self.calculate_result(self.y_test, self.train_NB_pred)
+		print 'acc', a
+		print 'f1_score', metrics.f1_score(self.y_test, self.train_NB_pred, average='weighted')
+		# print pred
 
-    def KNN(self,):
-        from sklearn.neighbors import KNeighborsClassifier
-        from sklearn import metrics
-        print '*************************\nKNN\n*************************'
-        self.KNNclf = KNeighborsClassifier()  # default with k=5
-        self.KNNclf.fit(self.x_train, self.y_train)
-        self.KNN_pred = self.KNNclf.predict(self.x_test)
-        print 'f1_score', metrics.f1_score(self.y_test, self.KNN_pred, average='weighted')
-        pass
+	def KNN(self,):
+		from sklearn.neighbors import KNeighborsClassifier
+		from sklearn import metrics
+		print '*************************\nKNN\n*************************'
+		self.KNNclf = KNeighborsClassifier(n_neighbors=6)  # default with k=5
+		self.KNNclf.fit(self.x_train, self.y_train)
+		self.KNN_pred = self.KNNclf.predict(self.x_test)
+		print 'f1_score', metrics.f1_score(self.y_test, self.KNN_pred, average='weighted')
+		pass
 
-    def SVM(self):
-        from sklearn.svm import SVC
-        from sklearn import metrics
-        print '*************************\nSVM\n*************************'
-        self.SVMclf = SVC(kernel='linear')  # default with 'rbf'
-        self.SVMclf.fit(self.x_train, self.y_train)
-        self.SVM_pred = self.SVMclf.predict(self.x_test)
-        # calculate_result(newsgroups_test.target, self.svc_pred)
+	def SVM(self):
+		from sklearn.svm import SVC
+		from sklearn import metrics
+		print '*************************\nSVM\n*************************'
+		self.SVMclf = SVC(kernel='linear')  # default with 'rbf'
+		self.SVMclf.fit(self.x_train, self.y_train)
+		self.SVM_pred = self.SVMclf.predict(self.x_test)
+		# calculate_result(newsgroups_test.target, self.SVM_pred)
 
-        print 'f1_score', metrics.f1_score(self.y_test, self.svc_pred, average='weighted')
+		print 'f1_score', metrics.f1_score(self.y_test, self.SVM_pred, average='weighted')
 
-    def test_news(self, url_path='./url.txt', classify_method='NB'):
-        """
-        分类器测试
-        url_path default ./url.txt
-        classfy  default NB
-        """
+	def test_news(self, url_path='./url.txt', classify_method='NB'):
+		"""
+		分类器测试
+		url_path default ./url.txt
+		classfy  default NB
+		"""
 
-        from sohu_spider import get_news
+		from sohu_spider import get_news
 
-        news = get_news(url_path)
+		news = get_news(url_path)
 
-        news = fenci_test(news)
-        # print news
-        if classify_method == 'NB':
+		news = fenci_test(news)
+		# print news
+		if classify_method == 'NB':
 
-            x = self.count_vec.transform(news)
-            self.test_NB_pred = self.NB_clf.predict(x)
-            print '-' * 10 + 'NB test result' + '-' * 10
+			x = self.count_vec.transform(news)
+			self.test_NB_pred = self.NB_clf.predict(x)
+			print '-' * 10 + 'NB test result' + '-' * 10
 
-            # print self.test_NB_pred
-            # print type(self.test_NB_pred)
-            for i in self.test_NB_pred:
-                print 'pred:', self.sohu_news.target_names[i]
+			# print self.test_NB_pred
+			# print type(self.test_NB_pred)
+			for i in self.test_NB_pred:
+				print 'pred:', self.sohu_news.target_names[i]
 
-        elif classify_method == 'KNN':
-            x = self.count_vec.transform(news)
-            self.test_KNN_pred = self.KNN_clf.predict(x)
-            print '-' * 10 + 'NB test result' + '-' * 10
+		elif classify_method == 'KNN':
+			x = self.count_vec.transform(news)
+			self.test_KNN_pred = self.KNN_clf.predict(x)
+			print '-' * 10 + 'NB test result' + '-' * 10
 
-            # print self.test_NB_pred
-            # print type(self.test_NB_pred)
-            for i in self.test_KNN_pred:
-                print 'pred:', self.sohu_news.target_names[i]
+			# print self.test_NB_pred
+			# print type(self.test_NB_pred)
+			for i in self.test_KNN_pred:
+				print 'pred:', self.sohu_news.target_names[i]
 
-        elif classify_method == 'SVM':
-            x = self.count_vec.transform(news)
-            self.test_SVM_pred = self.SVM_clf.predict(x)
-            print '-' * 10 + 'NB test result' + '-' * 10
+		elif classify_method == 'SVM':
+			x = self.count_vec.transform(news)
+			self.test_SVM_pred = self.SVM_clf.predict(x)
+			print '-' * 10 + 'NB test result' + '-' * 10
 
-            # print self.test_NB_pred
-            # print type(self.test_NB_pred)
-            with open('./result.txt', 'w') as f:
-                for i in self.test_SVM_pred:
-                    print 'pred:', self.sohu_news.target_names[i]
-                    f.write(self.sohu_news.target_names[i] + '\n')
+			# print self.test_NB_pred
+			# print type(self.test_NB_pred)
+			with open('./result.txt', 'w') as f:
+				for i in self.test_SVM_pred:
+					print 'pred:', self.sohu_news.target_names[i]
+					f.write(self.sohu_news.target_names[i] + '\n')
 
-    def calculate_result(self, actual, pred):
-        """
-        正确率 召回率 f 计算
-        """
-        from sklearn import metrics
+	def calculate_result(self, actual, pred):
+		"""
+		正确率 召回率 f 计算
+		"""
+		from sklearn import metrics
 
-        m_precision = metrics.precision_score(actual, pred)
-        m_recall = metrics.recall_score(actual, pred)
-        return m_precision
-        print 'predict info:'
-        print 'precision:{0:.3f}'.format(m_precision)
-        print 'recall:{0:0.3f}'.format(m_recall)
-        print 'f1-score:{0:.3f}'.format(metrics.f1_score(actual, pred))
+		m_precision = metrics.precision_score(actual, pred)
+		m_recall = metrics.recall_score(actual, pred)
+		return m_precision
+		print 'predict info:'
+		print 'precision:{0:.3f}'.format(m_precision)
+		print 'recall:{0:0.3f}'.format(m_recall)
+		print 'f1-score:{0:.3f}'.format(metrics.f1_score(actual, pred))
 
 
 def picture():
-    """
-    根据不同的特征提取方法
-    作图
-    """
-    import matplotlib.pyplot as plt
-    # fs_method_list = ['IG', 'MI', 'WLLR']
-    fs_method_list = ['MI']
-    fs_num_list = range(50000, 200000, 20000)
-    # fs_num_list=[300000]
-    # fs_num_list=range(10)
-    acc_dict = {}
+	"""
+	根据不同的特征提取方法
+	作图
+	"""
+	import matplotlib.pyplot as plt
+	fs_method_list = ['IG', 'MI', 'WLLR']
+	# fs_method_list = ['MI']
+	fs_num_list = range(10000, 220000, 10000)
 
-    for fs_method in fs_method_list:
-        acc_list = []
-        acc = news_classify(
-            data_path='./test4', stop_path='./stop_words.dat', test_size=0.1,)
-        for fs_num in fs_num_list:
-            # 每次初始化都会重新切分文本数据
-            # acc = news_classify(
-            # data_path='./test3', stop_path='./stop_words.dat',
-            # test_size=0.1,)
+	# fs_num_list = [300000]
+	# fs_num_list=range(10)
+	acc_dict = {}
 
-            acc.feature_processing(fs_method=fs_method, fs_num=fs_num)
-            acc.NB()
-            a = acc.calculate_result(acc.y_test, acc.train_NB_pred)
-            acc_list.append(a)
-        acc_dict[fs_method] = acc_list
-        print fs_method, acc_dict[fs_method]
+	for fs_method in fs_method_list:
+		acc_list = []
+		acc = news_classify(
+			data_path='./test4', stop_path='./stop_words.dat', test_size=0.1,)
+		for fs_num in fs_num_list:
+			# 每次初始化都会重新切分文本数据
+			acc_10 = []
 
-    for fs_method in fs_method_list:
-        plt.plot(fs_num_list, acc_dict[
-            fs_method],  '--^',  label=fs_method)
-        plt.title('feature  selection (classify NB)')
-        plt.xlabel('fs num')
-        plt.ylabel('accuracy')
-        # plt.ylim((0, 1.5))
+			# for i in range(10):
 
-    plt.legend(loc='upper left', numpoints=1)
-    plt.show()
+		# acc = news_classify(
+		#     data_path='./test4', stop_path='./stop_words.dat',
+		#     test_size=0.1,)
+
+			acc.feature_processing(fs_method=fs_method, fs_num=fs_num)
+			acc.KNN()
+			a = acc.calculate_result(acc.y_test, acc.KNN_pred)
+			# acc_10.append(a)
+			# a = sum(acc_10) / 10
+			acc_list.append(a)
+
+		acc_dict[fs_method] = acc_list
+		print fs_method, acc_dict[fs_method]
+
+	for fs_method in fs_method_list:
+		plt.plot(fs_num_list, acc_dict[
+			fs_method],  '--^',  label=fs_method)
+		plt.title('feature  selection (classify KNN)')
+		plt.xlabel('fs num')
+		plt.ylabel('accuracy')
+		# plt.ylim((0, 1.5))
+
+	plt.legend(loc='upper left', numpoints=1)
+	plt.show()
 
 
 if __name__ == '__main__':
-    """
-    test
-    """
-    # cla = news_classify(data_path='./test1')
-    # cla.feature_processing()
-    # cla.NB()
-    # cla.test_news()
-    # cla.feature_processing(fs_method='IG', fs_num=20000)
-    # cla.NB()
-    # cla.test_news()
-    picture()
+	"""
+	test
+	"""
+	# cla = news_classify(data_path='./test1')
+	# cla.feature_processing()
+	# cla.NB()
+	# cla.test_news()
+	# cla.feature_processing(fs_method='IG', fs_num=20000)
+	# cla.NB()
+	# cla.test_news()
+	picture()

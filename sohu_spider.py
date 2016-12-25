@@ -20,7 +20,7 @@ import requests
 from lxml import etree
 
 
-def get_news(url):
+def get_url_news(url):
     # url = sys.argv[1]
     """
     最基础的
@@ -40,14 +40,14 @@ def get_news(url):
     return news
 
 
-def get_url_news(path):
+def get_news(path):
     """
     对输入url进行判断
     url or 文件名
     """
     if path.startswith('http'):
         print 'crawl news:---------------------------------'
-        news = get_news(each)
+        news = get_url_news(path)
         print news
         return news
     else:
@@ -58,7 +58,7 @@ def get_url_news(path):
                 each = each.strip()
                 print 'crawl %d news:---------------------------------' %i
                 print each
-                news.append(get_news(each))
+                news.append(get_url_news(each))
                 i+=1
 
             return news
@@ -67,15 +67,13 @@ def get_url_news(path):
 def test():
     test_url1 = 'http://stock.sohu.com/20161202/n474784977.shtml'
     test_url2 = 'url.txt'
-    print get_news(test_url1)
-    print get_url_news(test_url2)
+    print get_url_news(test_url1)
+    print get_news(test_url2)
 
 if __name__ == '__main__':
     # url = sys.argv[1]
 
     print 'testing...'
-    test
-    print
     path = ''
     while 1:
         path = raw_input('please input url or file path (quit for exit):')
@@ -85,6 +83,5 @@ if __name__ == '__main__':
             print 'classify end'
             exit()
         else:
-
-            news = get_url_news(each)
+            news = get_news(each)
             print news
